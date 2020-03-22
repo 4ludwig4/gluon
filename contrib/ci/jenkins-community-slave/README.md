@@ -1,7 +1,11 @@
 # Gluon CI using Jenkins
 
 ## Requirements
-- Only a host with docker.
+- Linux system
+  - with docker installed
+  - with Hardware Virtualisation (KVM Support)
+    - Verify using: `lscpu | grep vmx`
+    - If machine is virtualized host needs to load `kvm_intel` with `nested=1` option and cpuflags need to include `vmx`
 
 ## Architecture
 
@@ -18,9 +22,11 @@ cd gluon/contrib/ci/jenkins-community-slave/
 docker build -t gluon-jenkins .
 mkdir /var/cache/openwrt_dl_cache/
 docker run --detach --restart always \
-    -e "SLAVE_NAME=whoareyou" \
-    -e "SLAVE_SECRET=changeme" \
-    -v /var/cache/openwrt_dl_cache/:/dl_cache
+    --env "SLAVE_NAME=whoareyou" \
+    --env "SLAVE_SECRET=changeme" \
+    --device /dev/kvm:/dev/kvm \
+    --volume /var/cache/openwrt_dl_cache/:/dl_cache \
+    gluon-jenkins
 ```
 4. Check whether the instance is running correctly:
    - Your node should appear [here](https://build.ffh.zone/label/gluon-docker/).
